@@ -1,31 +1,32 @@
 <!DOCTYPE html>
 
 <html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#db5945">
-    <title>You are paying with AliPay</title>
 
-    <!-- Bootstrap Core CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#db5945">
+  <title>You are paying with AliPay</title>
 
-    <script src="https://js.stripe.com/v3/"></script>
+  <!-- Bootstrap Core CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
 
-    <!-- Theme CSS -->
-    <link href="/css/new-age.min.css" rel="stylesheet">
-  </head>
+  <!-- Custom Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
 
-  <body>
-      <div class="container">
-          <h1 id="heading"></h1>
-      </div>
+  <!-- Theme CSS -->
+  <link href="/css/new-age.min.css" rel="stylesheet">
+</head>
 
-    <script>
+<body>
+  <div class="container">
+    <h1 id="heading"></h1>
+  </div>
+
+  <script>
     let paymentRequestClient;
 
     function redirectToAlipay(amount, currency) {
@@ -34,9 +35,9 @@
         amount: amount,
         currency: 'usd',
         redirect: {
-          return_url: 'https://bobpay.xyz/pay/alipay.html',
+          return_url: 'https://carte7000-payment-demo.herokuapp.com/pay/alipay.html',
         },
-      }).then(function(result) {
+      }).then(function (result) {
         if (result.error) {
           console.log(result.error);
         } else {
@@ -60,7 +61,7 @@
       stripe.retrieveSource({
         id: urlParams.get("source"),
         client_secret: urlParams.get("client_secret")
-      }).then(function(result) {
+      }).then(function (result) {
         var paymentAppResponse = {
           methodName: "https://www.alipay.com/webpay",
           details: result.source
@@ -75,11 +76,12 @@
     }
 
     function cancel() {
-      if(!paymentRequestClient) return;
+      if (!paymentRequestClient) return;
 
       paymentRequestClient.postMessage("The payment request is cancelled by user");
       window.close();
     }
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

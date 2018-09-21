@@ -1,17 +1,17 @@
 let payment_request_event = undefined;
 let payment_request_resolver = undefined;
 
-self.addEventListener('canmakepayment', function(e) {
+self.addEventListener('canmakepayment', function (e) {
   e.respondWith(true);
 });
 
-self.addEventListener('paymentrequest', function(e) {
+self.addEventListener('paymentrequest', function (e) {
   payment_request_event = e;
 
   payment_request_resolver = new PromiseResolver();
   e.respondWith(payment_request_resolver.promise);
 
-  var url = "https://bobpay.xyz/pay";
+  var url = "https://carte7000-payment-demo.herokuapp.com/pay";
   // The methodData here represents what the merchant supports. We could have a
   // payment selection screen, but for this simple demo if we see alipay in the list
   // we send the user through the alipay flow.
@@ -20,21 +20,21 @@ self.addEventListener('paymentrequest', function(e) {
 
   e.openWindow(url)
     .then(window_client => {
-      if(window_client == null)
+      if (window_client == null)
         payment_request_resolver.reject('Failed to open window');
     })
-    .catch(function(err) {
+    .catch(function (err) {
       payment_request_resolver.reject(err);
     })
 });
 
-self.addEventListener('message', listener = function(e) {
+self.addEventListener('message', listener = function (e) {
   if (e.data == "payment_app_window_ready") {
     sendPaymentRequest();
     return;
   }
 
-  if(e.data.methodName) {
+  if (e.data.methodName) {
     payment_request_resolver.resolve(e.data);
   } else {
     payment_request_resolver.reject(e.data);
@@ -49,8 +49,8 @@ function sendPaymentRequest() {
     includeUncontrolled: false,
     type: 'window'
   };
-  clients.matchAll(options).then(function(clientList) {
-    for(var i = 0; i < clientList.length; i++) {
+  clients.matchAll(options).then(function (clientList) {
+    for (var i = 0; i < clientList.length; i++) {
       // Might do more communications or checks to make sure the message is
       // posted to the correct window only.
 
@@ -74,7 +74,7 @@ function PromiseResolver() {
   this.reject_;
 
   /** @private {!Promise<T>} */
-  this.promise_ = new Promise(function(resolve, reject) {
+  this.promise_ = new Promise(function (resolve, reject) {
     this.resolve_ = resolve;
     this.reject_ = reject;
   }.bind(this));
