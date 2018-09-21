@@ -6,7 +6,8 @@
     "lint": "eslint '.'",
     "gulp": "gulp generate-service-worker",
     "build": "cd bobpay && npm install",
-    "start": "cd bobpay && npm start "
+    "start": "cd bobpay && npm start",
+    "postinstall": "cd bobpay && npm install"
   },
   "license": "Apache-2.0",
   "devDependencies": {
