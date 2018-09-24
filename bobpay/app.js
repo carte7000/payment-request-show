@@ -4,6 +4,8 @@ let express = require('express');
 let app = express();
 const http = require('http');
 
+var proxy = httpProxy.createProxyServer({ target: 'ws://178.128.230.11:8080/', ws: true });
+
 // All of our paths have the Link header.
 app.use(function (req, res, next) {
   res.status(200).links({
@@ -26,6 +28,9 @@ app.get('/keyFactory/:id/:ticker', (req, res) => {
 if (module === require.main) {
   let server = app.listen(process.env.PORT || 8080, function () {
     console.log('App listening on port %s', server.address().port);
+  });
+  server.on('upgrade', function (req, socket, head) {
+    proxy.ws(req, socket, head);
   });
 }
 

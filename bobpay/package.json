@@ -18,7 +18,8 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "http-proxy": "^1.17.0"
   },
   "devDependencies": {
     "browser-sync": "^2.13.0",
