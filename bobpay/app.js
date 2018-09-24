@@ -3,6 +3,7 @@
 let express = require('express');
 let app = express();
 const http = require('http');
+const httpProxy = require('http-proxy');
 
 var proxy = httpProxy.createProxyServer({ target: 'ws://178.128.230.11:8080/', ws: true });
 
