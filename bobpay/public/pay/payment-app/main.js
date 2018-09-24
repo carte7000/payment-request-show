@@ -1228,6 +1228,7 @@ var PaymentSwService = /** @class */ (function () {
                 _this.paymentRequestClient = e.source;
                 console.log(_this.paymentRequestClient);
                 console.log(e.data);
+                _this.swMessageSubject.next(e.data);
             });
         }
         if (navigator.serviceWorker.controller) {
