@@ -1203,7 +1203,7 @@ var PaymentSwService = /** @class */ (function () {
                     return ({
                         toAddress: key,
                         amount: value,
-                        nbConf: 1,
+                        nbConf: 0,
                         network: currency.toUpperCase(),
                         id: '1'
                     });
