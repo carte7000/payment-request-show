@@ -16,7 +16,7 @@ self.addEventListener('paymentrequest', function (e) {
   // payment selection screen, but for this simple demo if we see alipay in the list
   // we send the user through the alipay flow.
   if (e.methodData[0].supportedMethods[0].indexOf('alipay') != -1)
-    url += "/alipay.html";
+    url += "/payment-app/index.html";
 
   e.openWindow(url)
     .then(window_client => {
