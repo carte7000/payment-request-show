@@ -1166,8 +1166,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PaymentSwService", function() { return PaymentSwService; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _key_factory_key_factory_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../key-factory/key-factory.service */ "./src/app/services/key-factory/key-factory.service.ts");
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var _validation_validation_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../validation/validation.service */ "./src/app/services/validation/validation.service.ts");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../validation/validation.service */ "./src/app/services/validation/validation.service.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1181,24 +1182,43 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
 var PaymentSwService = /** @class */ (function () {
     function PaymentSwService(keyFactory, validation) {
         var _this = this;
         this.keyFactory = keyFactory;
         this.validation = validation;
-        this.currentTransaction = this.keyFactory.getKey('1', 'tBTC').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])((function (_a) {
-            var key = _a.key;
-            return ({
-                toAddress: key,
-                amount: 0.0001,
-                nbConf: 3,
-                network: 'TBTC',
-                id: '1'
-            });
-        })), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["shareReplay"])());
-        this.currentValidation = this.currentTransaction.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["switchMap"])(function (_a) {
+        this.swMessageSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["Subject"]();
+        this.currentTransaction =
+            this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_a) {
+                var total = _a.total;
+                return ({
+                    currency: "t" + total.currency,
+                    value: total.value,
+                });
+            }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
+                var currency = _a.currency, value = _a.value;
+                return _this.keyFactory.getKey('1', currency).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
+                    var key = _a.key;
+                    return ({
+                        toAddress: key,
+                        amount: value,
+                        nbConf: 1,
+                        network: currency.toUpperCase(),
+                        id: '1'
+                    });
+                })));
+            }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["shareReplay"])());
+        this.currentValidation = this.currentTransaction.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
             var amount = _a.amount, id = _a.id, nbConf = _a.nbConf, network = _a.network, toAddress = _a.toAddress;
             return _this.validation.watch({ address: toAddress, amount: amount, id: id, nbConf: nbConf, network: network });
+        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (v) {
+            if (v.isCompleted) {
+                _this.confirmPayment({
+                    amount: v.info.amount,
+                    address: v.info.addresses[0].address
+                });
+            }
         }));
     }
     PaymentSwService.prototype.init = function () {
@@ -1208,20 +1228,16 @@ var PaymentSwService = /** @class */ (function () {
                 _this.paymentRequestClient = e.source;
                 console.log(_this.paymentRequestClient);
                 console.log(e.data);
-                var test = parseFloat(e.data.value) * 100, test2 = e.data.currency.toLowerCase();
             });
         }
         if (navigator.serviceWorker.controller) {
             navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
         }
     };
-    PaymentSwService.prototype.confirmPayment = function () {
+    PaymentSwService.prototype.confirmPayment = function (details) {
         var paymentAppResponse = {
             methodName: 'https://carte7000-payment-demo.herokuapp.com/pay',
-            details: {
-                bobpay_token_id: 'ABCDEADBEEF',
-                message: 'Thanks for using BobPay!'
-            }
+            details: details,
         };
         this.paymentRequestClient.postMessage(paymentAppResponse);
     };
@@ -1237,7 +1253,7 @@ var PaymentSwService = /** @class */ (function () {
             providedIn: 'root'
         }),
         __metadata("design:paramtypes", [_key_factory_key_factory_service__WEBPACK_IMPORTED_MODULE_1__["KeyFactoryService"],
-            _validation_validation_service__WEBPACK_IMPORTED_MODULE_3__["ValidationService"]])
+            _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__["ValidationService"]])
     ], PaymentSwService);
     return PaymentSwService;
 }());
