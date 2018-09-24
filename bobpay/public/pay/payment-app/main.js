@@ -1305,7 +1305,7 @@ __webpack_require__.r(__webpack_exports__);
 var environment = {
     production: false,
     // keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
-    wsProxyUrl: 'ws://carte7000-payment-demo.herokuapp.com',
+    wsProxyUrl: 'wss://carte7000-payment-demo.herokuapp.com',
     keyFactory: '/keyFactory/',
 };
 /*
