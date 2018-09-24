@@ -812,7 +812,7 @@ var AppModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf='validation | async as validation'>\n  <h3>Your transaction is in progress</h3>\n  Amount {{validation.amount}} {{validation.ticker}}\n  <it-progress-bar [progress]='validation.currentNbConf' [max]='validation.requiredNbConf'></it-progress-bar>\n</div>"
+module.exports = "<div *ngIf='validation | async as validation'>\n  <h3>Your transaction is in progress</h3>\n  Amount {{validation.amount}} {{validation.ticker}}\n  <it-progress-bar [progress]='validation.currentNbConf' [max]='validation.requiredNbConf'></it-progress-bar>\n\n  <div *ngIf='validation.isCompleted'>\n    <button>Return to merchant site</button>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -858,20 +858,17 @@ var ConfirmationsComponent = /** @class */ (function () {
     function ConfirmationsComponent(sw) {
         this.sw = sw;
         this.validation = Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["combineLatest"])(this.sw.currentValidation, this.sw.currentTransaction).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (_a) {
-            var info = _a[0].info, tx = _a[1];
+            var _b = _a[0], info = _b.info, isCompleted = _b.isCompleted, tx = _a[1];
             return ({
                 currentNbConf: info.currentNbConf,
                 requiredNbConf: info.requiredNbConf,
                 ticker: info.network,
-                amount: tx.amount
+                amount: tx.amount,
+                isCompleted: isCompleted,
             });
         }));
     }
     ConfirmationsComponent.prototype.ngOnInit = function () {
-        this.sw.currentValidation.subscribe(function (validation) {
-            if (validation.isCompleted) {
-            }
-        });
     };
     ConfirmationsComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -1205,27 +1202,29 @@ var PaymentSwService = /** @class */ (function () {
         }));
     }
     PaymentSwService.prototype.init = function () {
-        var paymentRequestClient;
-        function redirectToAlipay(amount, currency) {
-        }
+        var _this = this;
         navigator.serviceWorker.addEventListener('message', function (e) {
-            paymentRequestClient = e.source;
-            // TODO(mathp): amounts are hard!
-            redirectToAlipay(parseFloat(e.data.value) * 100, e.data.currency.toLowerCase());
+            _this.paymentRequestClient = e.source;
+            var test = parseFloat(e.data.value) * 100, test2 = e.data.currency.toLowerCase();
         });
-        var urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('source')) {
-        }
-        else {
-            navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
-        }
-        function cancel() {
-            if (!paymentRequestClient) {
-                return;
+        navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
+    };
+    PaymentSwService.prototype.confirmPayment = function () {
+        var paymentAppResponse = {
+            methodName: 'https://carte7000-payment-demo.herokuapp.com/pay',
+            details: {
+                bobpay_token_id: 'ABCDEADBEEF',
+                message: 'Thanks for using BobPay!'
             }
-            paymentRequestClient.postMessage('The payment request is cancelled by user');
-            window.close();
+        };
+        this.paymentRequestClient.postMessage(paymentAppResponse);
+    };
+    PaymentSwService.prototype.cancelPaymentRequest = function () {
+        if (!this.paymentRequestClient) {
+            return;
         }
+        this.paymentRequestClient.postMessage('The payment request is cancelled by user');
+        window.close();
     };
     PaymentSwService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
@@ -1305,6 +1304,7 @@ __webpack_require__.r(__webpack_exports__);
 var environment = {
     production: false,
     // keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
+    // wsProxyUrl: 'ws://178.128.230.11:8080/',
     wsProxyUrl: 'wss://carte7000-payment-demo.herokuapp.com',
     keyFactory: '/keyFactory/',
 };
