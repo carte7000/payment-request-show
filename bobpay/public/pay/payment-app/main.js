@@ -1207,6 +1207,7 @@ var PaymentSwService = /** @class */ (function () {
             navigator.serviceWorker.addEventListener('message', function (e) {
                 _this.paymentRequestClient = e.source;
                 console.log(_this.paymentRequestClient);
+                console.log(e.data);
                 var test = parseFloat(e.data.value) * 100, test2 = e.data.currency.toLowerCase();
             });
         }
