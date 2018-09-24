@@ -11,12 +11,12 @@ self.addEventListener('paymentrequest', function (e) {
   payment_request_resolver = new PromiseResolver();
   e.respondWith(payment_request_resolver.promise);
 
-  var url = "https://carte7000-payment-demo.herokuapp.com/pay";
+  var url = "https://carte7000-payment-demo.herokuapp.com/pay/payment-app/index.html";
   // The methodData here represents what the merchant supports. We could have a
   // payment selection screen, but for this simple demo if we see alipay in the list
   // we send the user through the alipay flow.
-  if (e.methodData[0].supportedMethods[0].indexOf('alipay') != -1)
-    url += "/payment-app/index.html";
+  // if (e.methodData[0].supportedMethods[0].indexOf('alipay') != -1)
+  //   url += "/payment-app/index.html";
 
   e.openWindow(url)
     .then(window_client => {
