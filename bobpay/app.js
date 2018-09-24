@@ -2,6 +2,7 @@
 
 let express = require('express');
 let app = express();
+const http = require('http');
 
 // All of our paths have the Link header.
 app.use(function (req, res, next) {
@@ -14,6 +15,11 @@ app.use(function (req, res, next) {
 // We are mostly a static website.
 app.use(express.static('public'));
 
+app.get('/keyFactory/:id/:ticker', (req, res) => {
+  http.get(`http://142.93.60.68:5080/api/v1/getaddress/${req.params.id}/${req.params.ticker}`, (response) => {
+    response.pipe(res);
+  })
+})
 /**
  * Starts the server.
  */

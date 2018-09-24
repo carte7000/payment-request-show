@@ -315,7 +315,7 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 var AppModule = /** @class */ (function () {
     function AppModule(sw) {
-        sw.init();
+        // sw.init();
     }
     AppModule = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"])({
@@ -729,7 +729,7 @@ __webpack_require__.r(__webpack_exports__);
 // The list of file replacements can be found in `angular.json`.
 var environment = {
     production: false,
-    keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
+    keyFactory: '/keyFactory',
 };
 /*
  * In development mode, to ignore zone related error stack frames such as
