@@ -1304,8 +1304,9 @@ __webpack_require__.r(__webpack_exports__);
 // The list of file replacements can be found in `angular.json`.
 var environment = {
     production: false,
-    keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
+    // keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
     wsProxyUrl: 'ws://178.128.230.11:8080/',
+    keyFactory: '/keyFactory/',
 };
 /*
  * In development mode, to ignore zone related error stack frames such as
