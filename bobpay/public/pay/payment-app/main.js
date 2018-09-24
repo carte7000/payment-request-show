@@ -771,7 +771,7 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 var AppModule = /** @class */ (function () {
     function AppModule(sw) {
-        // sw.init();
+        sw.init();
     }
     AppModule = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"])({
@@ -1203,11 +1203,16 @@ var PaymentSwService = /** @class */ (function () {
     }
     PaymentSwService.prototype.init = function () {
         var _this = this;
-        navigator.serviceWorker.addEventListener('message', function (e) {
-            _this.paymentRequestClient = e.source;
-            var test = parseFloat(e.data.value) * 100, test2 = e.data.currency.toLowerCase();
-        });
-        navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.addEventListener('message', function (e) {
+                _this.paymentRequestClient = e.source;
+                console.log(_this.paymentRequestClient);
+                var test = parseFloat(e.data.value) * 100, test2 = e.data.currency.toLowerCase();
+            });
+        }
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
+        }
     };
     PaymentSwService.prototype.confirmPayment = function () {
         var paymentAppResponse = {
