@@ -26,15 +26,50 @@ app.get('/keyFactory/:id/:ticker', (req, res) => {
 })
 
 app.post('/ledger/tx', (req, res) => {
-  http.post('http://138.197.156.204:8081/tx', req.body, (response) => {
+  var post_data = JSON.stringify(req.body);
+  var post_options = {
+    host: 'http://138.197.156.204',
+    port: '8081',
+    path: '/tx',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(post_data)
+    }
+  };
+  // Set up the request
+  var post_req = http.request(post_options, function (res) {
     response.pipe(res);
-  })
+  });
+
+  // post the data
+  post_req.write(post_data);
+  post_req.end();
 })
 
 app.post('/ledger/create', (req, res) => {
-  http.post('http://138.197.156.204:8081/create', req.body, (response) => {
+  var post_data = JSON.stringify(req.body);
+  var post_options = {
+    host: 'http://138.197.156.204',
+    port: '8081',
+    path: '/create',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(post_data)
+    }
+  };
+  // Set up the request
+  var post_req = http.request(post_options, function (res) {
     response.pipe(res);
-  })
+  });
+
+  // post the data
+  post_req.write(post_data);
+  post_req.end();
+  // http.post('http://138.197.156.204:8081/create', req.body, (response) => {
+  //   response.pipe(res);
+  // })
 })
 /**
  * Starts the server.
