@@ -38,7 +38,7 @@ app.post('/ledger/tx', (req, res) => {
     }
   };
   // Set up the request
-  var post_req = http.request(post_options, function (res) {
+  var post_req = http.request(post_options, function (response) {
     response.pipe(res);
   });
 
@@ -60,7 +60,7 @@ app.post('/ledger/create', (req, res) => {
     }
   };
   // Set up the request
-  var post_req = http.request(post_options, function (res) {
+  var post_req = http.request(post_options, function (response) {
     response.pipe(res);
   });
 
