@@ -34,7 +34,8 @@ app.post('/ledger/tx', (req, res) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(post_data)
+      'Content-Length': Buffer.byteLength(post_data),
+      'apicode': '85732589752hjfslkjhf'
     }
   };
   // Set up the request
@@ -56,7 +57,8 @@ app.post('/ledger/create', (req, res) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(post_data)
+      'Content-Length': Buffer.byteLength(post_data),
+      'apicode': '85732589752hjfslkjhf'
     }
   };
   // Set up the request
