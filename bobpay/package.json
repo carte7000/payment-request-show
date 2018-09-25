@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "express": "^4.13.4",
+    "body-parser": "^1.18.3",
     "http-proxy": "^1.17.0"
   },
   "devDependencies": {

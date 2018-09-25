@@ -1,362 +1,5 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["main"],{
 
-/***/ "../validator-lib/dist/address-validation.js":
-/*!***************************************************!*\
-  !*** ../validator-lib/dist/address-validation.js ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class AddressValidation {
-    constructor(info) {
-        this.info = info;
-    }
-    get isValid() {
-        return this.info.currentNbConf === this.info.requiredNbConf;
-    }
-    get isCompleted() {
-        return this.info.currentNbConf >= this.info.requiredNbConf;
-    }
-}
-exports.AddressValidation = AddressValidation;
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/browser.js":
-/*!****************************************!*\
-  !*** ../validator-lib/dist/browser.js ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-var browserValidatorFactory_1 = __webpack_require__(/*! ./browserValidatorFactory */ "../validator-lib/dist/browserValidatorFactory.js");
-exports.ValidatorFactory = browserValidatorFactory_1.BrowserValidatorFactory;
-var proxied_watcher_proxy_1 = __webpack_require__(/*! ./watcher-proxy/proxied-watcher-proxy */ "../validator-lib/dist/watcher-proxy/proxied-watcher-proxy.js");
-exports.WatcherProxy = proxied_watcher_proxy_1.ProxiedWatcherProxy;
-__export(__webpack_require__(/*! ./watcher-proxy/cached-watcher-proxy */ "../validator-lib/dist/watcher-proxy/cached-watcher-proxy.js"));
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/browserValidatorFactory.js":
-/*!********************************************************!*\
-  !*** ../validator-lib/dist/browserValidatorFactory.js ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const validator_1 = __webpack_require__(/*! ./validator/validator */ "../validator-lib/dist/validator/validator.js");
-class BrowserValidatorFactory {
-    static create(watcher) {
-        return new validator_1.Validator(watcher || {});
-    }
-}
-exports.BrowserValidatorFactory = BrowserValidatorFactory;
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/transfer-request.js":
-/*!*************************************************!*\
-  !*** ../validator-lib/dist/transfer-request.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class TransferRequest {
-    constructor(_validationResponse) {
-        this._validationResponse = _validationResponse;
-        this.timestamp = new Date();
-    }
-    get source() {
-        return this._validationResponse.source;
-    }
-    get dest() {
-        return this._validationResponse.dest;
-    }
-    get id() {
-        return this._validationResponse.id;
-    }
-    get isSourceCompleted() {
-        return !!(this._validationResponse.source && this._validationResponse.source.currentNbConf >= this._validationResponse.source.requiredNbConf);
-    }
-    get isDestCompleted() {
-        return !!(this._validationResponse.dest && this._validationResponse.dest.currentNbConf >= this._validationResponse.dest.requiredNbConf);
-    }
-    get isCompleted() {
-        return this.isSourceCompleted && this.isDestCompleted;
-    }
-    get isValid() {
-        return !!(this._validationResponse.source && this._validationResponse.dest && this._validationResponse.dest.amount === this._validationResponse.source.amount);
-    }
-    toJSON() {
-        return Object.assign({}, this._validationResponse, { validatorReceivedAt: this.timestamp });
-    }
-}
-exports.TransferRequest = TransferRequest;
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/validator/validator.js":
-/*!****************************************************!*\
-  !*** ../validator-lib/dist/validator/validator.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
-    return t;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const rxjs_1 = __webpack_require__(/*! rxjs */ "../validator-lib/node_modules/rxjs/_esm5/index.js");
-const operators_1 = __webpack_require__(/*! rxjs/operators */ "../validator-lib/node_modules/rxjs/_esm5/operators/index.js");
-const transfer_request_1 = __webpack_require__(/*! ../transfer-request */ "../validator-lib/dist/transfer-request.js");
-const bignumber_js_1 = __webpack_require__(/*! bignumber.js */ "../validator-lib/node_modules/bignumber.js/bignumber.js");
-const address_validation_1 = __webpack_require__(/*! ../address-validation */ "../validator-lib/dist/address-validation.js");
-class Validator {
-    constructor(_watcherProxy) {
-        this._watcherProxy = _watcherProxy;
-        this.isResponseEventMatchingRequest = (request, prop) => operators_1.filter((payload) => this.getKeyFromResponse(payload) === this.getKeyFromRequest(request, prop));
-        this.isResponseEventMatchingSingleRequest = (request) => operators_1.filter((payload) => this.getKeyFromResponse(payload) === this.getKeyFromSingleRequest(request));
-        this.unsubscribeOnCompleted = (request) => operators_1.tap((validation) => {
-            if (validation.isCompleted) {
-                this._watcherProxy.unwatch(request.id, request.address, request.network, request.nbConf);
-            }
-        });
-    }
-    uniformize(_a) {
-        var { network, addresses, nbConf } = _a, rest = __rest(_a, ["network", "addresses", "nbConf"]);
-        return Object.assign({ network: network.toUpperCase(), addresses: addresses.map(({ address, amount, onlyReqConf, requiredConf }) => {
-                return {
-                    amount: Math.abs(Number(amount)),
-                    address,
-                    onlyReqConf,
-                    requiredConf: Number(requiredConf),
-                };
-            }), nbConf: Number(nbConf) }, rest);
-    }
-    // TODO extract this into its own npm package @interblockchain/utils
-    convertAmount(amount, ticker) {
-        console.log(" Amount: " + amount + " ticker: " + ticker);
-        let value = new bignumber_js_1.BigNumber(amount);
-        if (!value.isFinite() || value.isZero()) {
-            throw { name: "convertAmount", message: "Amount is zero or not finite." };
-        }
-        switch (ticker.toUpperCase()) {
-            // case "XLM":
-            //     return value.toString()
-            case "TBTC":
-            case "TLTC":
-            case "ITLTC":
-            case "ITBTC":
-            case "TBCH":
-            case "ITBCH":
-                //Satoshi is 10^-8 BTC
-                let factor = new bignumber_js_1.BigNumber(10).exponentiatedBy(8);
-                return value.multipliedBy(factor).toString();
-            case "TETH":
-            case "ITETH":
-                //Wei is 10^-18 ETH
-                factor = new bignumber_js_1.BigNumber(10).exponentiatedBy(18);
-                return value.multipliedBy(factor).toString();
-            default:
-                throw { name: "convertAmount", message: "Asset not supported" };
-        }
-    }
-    getAddress(addresses) {
-        return addresses[0].address;
-    }
-    getKeyFromRequest(request, prop) {
-        console.log(`${request[prop].address.toUpperCase()}:${request[prop].network.toUpperCase()}:${this.convertAmount(request.amount, 'tBTC')}`);
-        return `${request[prop].address.toUpperCase()}:${request[prop].network.toUpperCase()}:${this.convertAmount(request.amount, 'tBTC')}`;
-    }
-    getKeyFromSingleRequest(request) {
-        console.log(`${request.address.toUpperCase()}:${request.network.toUpperCase()}:${this.convertAmount(request.amount, 'tBTC')}`);
-        return `${request.address.toUpperCase()}:${request.network.toUpperCase()}:${this.convertAmount(request.amount, 'tBTC')}`;
-    }
-    getKeyFromResponse(response) {
-        const address = this.getAddress(response.addresses);
-        console.log(`${address.toUpperCase()}:${response.network.toUpperCase()}:${response.addresses[0].amount}`);
-        return `${address.toUpperCase()}:${response.network.toUpperCase()}:${response.addresses[0].amount}`;
-    }
-    validateSingleTransaction(request) {
-        return this._watcherProxy.watch(request.id, request.address, request.network, request.nbConf).pipe(operators_1.tap(() => console.log('Data received')), operators_1.tap(console.log), operators_1.map(this.uniformize), this.isResponseEventMatchingSingleRequest(request), operators_1.tap(() => console.log('Response matching request'))).pipe(operators_1.map((validation) => {
-            return Object.assign({ id: request.id }, validation, { requiredNbConf: request.nbConf, currentNbConf: validation.nbConf, amount: validation.addresses[0].amount });
-        }), operators_1.map((response) => new address_validation_1.AddressValidation(response)), this.unsubscribeOnCompleted(request));
-    }
-    ;
-    validate(request) {
-        return rxjs_1.combineLatest(this._watcherProxy.watch(request.id, request.source.address, request.source.network, request.source.nbConf).pipe(operators_1.tap(console.log), operators_1.map(this.uniformize), this.isResponseEventMatchingRequest(request, 'source'), operators_1.startWith(null)), this._watcherProxy.watch(request.id, request.destination.address, request.destination.network, request.destination.nbConf).pipe(operators_1.tap(console.log), operators_1.map(this.uniformize), this.isResponseEventMatchingRequest(request, 'destination'), operators_1.startWith(null))).pipe(operators_1.tap(console.log), operators_1.map(([source, destination]) => {
-            const src = source;
-            const dest = destination;
-            let sourcePayload = null;
-            let destinationPayload = null;
-            if (source) {
-                sourcePayload = Object.assign({}, src, { amount: src.addresses[0].amount, txHash: src.txHash, currentNbConf: src.nbConf, requiredNbConf: request.source.nbConf });
-            }
-            if (destination) {
-                destinationPayload = Object.assign({}, dest, { amount: dest.addresses[0].amount, currentNbConf: dest.nbConf, txHash: dest.txHash, requiredNbConf: request.destination.nbConf });
-            }
-            return {
-                id: request.id,
-                source: sourcePayload,
-                dest: destinationPayload
-            };
-        }), operators_1.map(response => new transfer_request_1.TransferRequest(response)), this.unsubscribeOnCompleted(Object.assign({ id: request.id, amount: request.amount }, request.source)), this.unsubscribeOnCompleted(Object.assign({ id: request.id, amount: request.amount }, request.destination)));
-    }
-}
-exports.Validator = Validator;
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/watcher-proxy/cached-watcher-proxy.js":
-/*!*******************************************************************!*\
-  !*** ../validator-lib/dist/watcher-proxy/cached-watcher-proxy.js ***!
-  \*******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const operators_1 = __webpack_require__(/*! rxjs/operators */ "../validator-lib/node_modules/rxjs/_esm5/operators/index.js");
-class CachedWatcherProxy {
-    constructor(watcher) {
-        this.watcher = watcher;
-        this.watchMap = new Map();
-    }
-    watch(transactionId, address, network, nbConf) {
-        const key = `${transactionId}:${address}:${network}:${nbConf}`;
-        if (!this.watchMap.has(key)) {
-            this.watchMap.set(key, this.watcher.watch(transactionId, address, network, nbConf).pipe(operators_1.shareReplay()));
-        }
-        return this.watchMap.get(key);
-    }
-    unwatch(transactionId, address, network, nbConf) {
-        return this.watcher.unwatch(transactionId, address, network, nbConf);
-    }
-}
-exports.CachedWatcherProxy = CachedWatcherProxy;
-
-
-/***/ }),
-
-/***/ "../validator-lib/dist/watcher-proxy/proxied-watcher-proxy.js":
-/*!********************************************************************!*\
-  !*** ../validator-lib/dist/watcher-proxy/proxied-watcher-proxy.js ***!
-  \********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
-    return t;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const operators_1 = __webpack_require__(/*! rxjs/operators */ "../validator-lib/node_modules/rxjs/_esm5/operators/index.js");
-const rxjs_1 = __webpack_require__(/*! rxjs */ "../validator-lib/node_modules/rxjs/_esm5/index.js");
-const webSocket_1 = __webpack_require__(/*! rxjs/webSocket */ "../validator-lib/node_modules/rxjs/_esm5/webSocket/index.js");
-class ProxiedWatcherProxy {
-    constructor(proxyUrl, appIdSelector = () => localStorage.getItem('appID')) {
-        this.proxyUrl = proxyUrl;
-        this.appIdSelector = appIdSelector;
-        this.initObservable = rxjs_1.Observable.create((obs) => {
-            this.websocketSubject.next({
-                'action': 'init-proxy-connection',
-                'body': {
-                    'url': 'ws://206.189.191.247:7999/BTCnet/ws-validator',
-                    'params': {
-                        'headers': { 'apiKey': '42ad9bf1-1706-4104-901f-8d59d927dc5d' }
-                    }
-                }
-            });
-            obs.next(this.websocketObs);
-        });
-        this.websocketSubject = new webSocket_1.WebSocketSubject({
-            url: this.proxyUrl,
-            serializer: (data) => {
-                if (typeof data === 'string') {
-                    return data;
-                }
-                else {
-                    return JSON.stringify(data);
-                }
-            }
-        });
-        this.websocketObs = this.websocketSubject.asObservable();
-        this.proxyInitialized = this.initObservable
-            .pipe(operators_1.switchMap((ws) => ws), operators_1.filter((data) => data.success), operators_1.switchMap(() => {
-            return rxjs_1.Observable.create((obs) => {
-                this.websocketSubject.next('clientID: ' + this.appIdSelector());
-                obs.next(null);
-            });
-        }), operators_1.delay(2000), operators_1.shareReplay());
-    }
-    unwatch(transactionId, address, network, nbConf) {
-        this.websocketSubject.next(this.createUnSubscribe(transactionId, address, network, nbConf));
-        return rxjs_1.of();
-    }
-    watch(id, address, network, nbConf) {
-        const ws = this.proxyInitialized.pipe(operators_1.switchMap(() => {
-            this.websocketSubject.next(this.createSubscribeRequest(id, address, network, nbConf));
-            return this.websocketObs;
-        }));
-        return ws;
-    }
-    createSubscribeRequest(transactionId, address, network, nbConf) {
-        return {
-            transactionID: transactionId,
-            action: 'subscribe',
-            clientURL: localStorage.getItem(`appID`),
-            network: network,
-            address: address,
-            requiredConf: nbConf,
-            onlyReqConf: false,
-        };
-    }
-    createUnSubscribe(transactionId, address, network, nbConf) {
-        const _a = this.createSubscribeRequest(transactionId, address, network, nbConf), { action } = _a, rest = __rest(_a, ["action"]);
-        return Object.assign({}, rest, { action: 'unsubscribe' });
-    }
-}
-exports.ProxiedWatcherProxy = ProxiedWatcherProxy;
-
-
-/***/ }),
-
 /***/ "./dist/interblockchain-components/fesm5/interblockchain-components.js":
 /*!*****************************************************************************!*\
   !*** ./dist/interblockchain-components/fesm5/interblockchain-components.js ***!
@@ -812,7 +455,7 @@ var AppModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf='validation | async as validation'>\n  <h3>Your transaction is in progress</h3>\n  Amount {{validation.amount}} {{validation.ticker}}\n  <it-progress-bar [progress]='validation.currentNbConf' [max]='validation.requiredNbConf'></it-progress-bar>\n\n  <div *ngIf='validation.isCompleted'>\n    <button>Return to merchant site</button>\n  </div>\n</div>"
+module.exports = "<div class='confirmations-container' *ngIf='validation | async as validation'>\n  <h3>Your transaction is in progress</h3>\n  Amount {{validation.amount}} {{validation.ticker}}\n  <it-progress-bar [progress]='validation.currentNbConf' [max]='validation.requiredNbConf'></it-progress-bar>\n\n  <div *ngIf='validation.isCompleted'>\n    <button (click)='confirm()'>Return to merchant site</button>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -823,7 +466,7 @@ module.exports = "<div *ngIf='validation | async as validation'>\n  <h3>Your tra
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ""
+module.exports = ".confirmations-container {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center; }\n"
 
 /***/ }),
 
@@ -869,6 +512,9 @@ var ConfirmationsComponent = /** @class */ (function () {
         }));
     }
     ConfirmationsComponent.prototype.ngOnInit = function () {
+    };
+    ConfirmationsComponent.prototype.confirm = function () {
+        this.sw.confirmPayment();
     };
     ConfirmationsComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -1154,6 +800,70 @@ var KeyFactoryService = /** @class */ (function () {
 
 /***/ }),
 
+/***/ "./src/app/services/ledger/ledger.service.ts":
+/*!***************************************************!*\
+  !*** ./src/app/services/ledger/ledger.service.ts ***!
+  \***************************************************/
+/*! exports provided: LedgerService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LedgerService", function() { return LedgerService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../environments/environment */ "./src/environments/environment.ts");
+var __assign = (undefined && undefined.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+var LedgerService = /** @class */ (function () {
+    function LedgerService(http) {
+        this.http = http;
+    }
+    LedgerService.prototype.headers = function (_a) {
+        var apiKey = _a.apiKey;
+        return {
+            headers: {
+                'apicode': apiKey
+            }
+        };
+    };
+    LedgerService.prototype.createAccount = function (account, apiKey) {
+        return this.http.post(_environments_environment__WEBPACK_IMPORTED_MODULE_2__["environment"].ledgerUrl + "create", __assign({}, account), this.headers({ apiKey: apiKey }));
+    };
+    LedgerService.prototype.createTx = function (tx, apiKey) {
+        return this.http.post(_environments_environment__WEBPACK_IMPORTED_MODULE_2__["environment"].ledgerUrl + "tx", __assign({}, tx, { operation: '+' }), this.headers({ apiKey: apiKey }));
+    };
+    LedgerService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        }),
+        __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
+    ], LedgerService);
+    return LedgerService;
+}());
+
+
+
+/***/ }),
+
 /***/ "./src/app/services/payment-sw/payment-sw.service.ts":
 /*!***********************************************************!*\
   !*** ./src/app/services/payment-sw/payment-sw.service.ts ***!
@@ -1169,6 +879,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
 /* harmony import */ var _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../validation/validation.service */ "./src/app/services/validation/validation.service.ts");
+/* harmony import */ var _ledger_ledger_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../ledger/ledger.service */ "./src/app/services/ledger/ledger.service.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils */ "./src/app/utils.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1183,51 +895,75 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
+
 var PaymentSwService = /** @class */ (function () {
-    function PaymentSwService(keyFactory, validation) {
+    function PaymentSwService(keyFactory, validation, ledger) {
         var _this = this;
         this.keyFactory = keyFactory;
         this.validation = validation;
-        this.swMessageSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["Subject"]();
-        this.currentTransaction =
-            this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_a) {
-                var total = _a.total;
-                return ({
+        this.ledger = ledger;
+        this.swMessageSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["ReplaySubject"]();
+        this.writeTransactionInLedger = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (tx) {
+            return _this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
+                var total = _a.total, apiKey = _a.methodData.apiKey;
+                var uuid = Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])();
+                return _this.ledger.createAccount({
+                    accountID: uuid,
                     currency: "t" + total.currency,
-                    value: total.value,
-                });
-            }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
-                var currency = _a.currency, value = _a.value;
-                return _this.keyFactory.getKey('1', currency).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
-                    var key = _a.key;
-                    return ({
-                        toAddress: key,
-                        amount: value,
-                        nbConf: 0,
-                        network: currency.toUpperCase(),
-                        id: '1'
-                    });
-                })));
-            }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["shareReplay"])());
-        this.currentValidation = this.currentTransaction.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
+                    folio: tx.toAddress,
+                    note: ''
+                }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
+                    return _this.ledger.createTx({
+                        accountID: uuid,
+                        amount: tx.amount,
+                        currency: "t" + total.currency,
+                        provider: '',
+                        from: '',
+                        initialValue: '0'
+                    }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_) { return tx; }));
+                }));
+            }));
+        });
+        this.watchingConfirmationsAndMapToValidation = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
             var amount = _a.amount, id = _a.id, nbConf = _a.nbConf, network = _a.network, toAddress = _a.toAddress;
             return _this.validation.watch({ address: toAddress, amount: amount, id: id, nbConf: nbConf, network: network });
-        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (v) {
+        });
+        this.sendResultToClientIfCompleted = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (v) {
             if (v.isCompleted) {
-                _this.confirmPayment({
-                    amount: v.info.amount,
+                _this.details = {
+                    amount: Math.pow(10, 8) * v.info.amount,
                     address: v.info.addresses[0].address
-                });
+                };
             }
-        }));
+        });
+        this.getPaymentKeyAndCreateTransaction = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
+            var currency = _a.currency, value = _a.value;
+            return _this.keyFactory.getKey(Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])(), currency).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
+                var key = _a.key;
+                return ({
+                    toAddress: key,
+                    amount: value,
+                    nbConf: 0,
+                    network: currency.toUpperCase(),
+                    id: Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])()
+                });
+            })));
+        });
+        this.currentTransaction = this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_a) {
+            var total = _a.total;
+            return ({
+                currency: "t" + total.currency,
+                value: total.value,
+            });
+        }), this.getPaymentKeyAndCreateTransaction, Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["shareReplay"])());
+        this.currentValidation = this.currentTransaction.pipe(this.writeTransactionInLedger, this.watchingConfirmationsAndMapToValidation, this.sendResultToClientIfCompleted);
     }
     PaymentSwService.prototype.init = function () {
         var _this = this;
         if (navigator.serviceWorker) {
             navigator.serviceWorker.addEventListener('message', function (e) {
                 _this.paymentRequestClient = e.source;
-                console.log(_this.paymentRequestClient);
-                console.log(e.data);
                 _this.swMessageSubject.next(e.data);
             });
         }
@@ -1235,10 +971,10 @@ var PaymentSwService = /** @class */ (function () {
             navigator.serviceWorker.controller.postMessage('payment_app_window_ready');
         }
     };
-    PaymentSwService.prototype.confirmPayment = function (details) {
+    PaymentSwService.prototype.confirmPayment = function () {
         var paymentAppResponse = {
             methodName: 'https://carte7000-payment-demo.herokuapp.com/pay',
-            details: details,
+            details: this.details,
         };
         this.paymentRequestClient.postMessage(paymentAppResponse);
     };
@@ -1254,7 +990,8 @@ var PaymentSwService = /** @class */ (function () {
             providedIn: 'root'
         }),
         __metadata("design:paramtypes", [_key_factory_key_factory_service__WEBPACK_IMPORTED_MODULE_1__["KeyFactoryService"],
-            _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__["ValidationService"]])
+            _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__["ValidationService"],
+            _ledger_ledger_service__WEBPACK_IMPORTED_MODULE_5__["LedgerService"]])
     ], PaymentSwService);
     return PaymentSwService;
 }());
@@ -1274,9 +1011,10 @@ var PaymentSwService = /** @class */ (function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ValidationService", function() { return ValidationService; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @interblockchain/validator/dist/browser */ "../validator-lib/dist/browser.js");
+/* harmony import */ var _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @interblockchain/validator/dist/browser */ "./node_modules/@interblockchain/validator/dist/browser.js");
 /* harmony import */ var _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../environments/environment */ "./src/environments/environment.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils */ "./src/app/utils.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1289,9 +1027,10 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
 var ValidationService = /** @class */ (function () {
     function ValidationService() {
-        var watcherProxy = new _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__["WatcherProxy"](_environments_environment__WEBPACK_IMPORTED_MODULE_2__["environment"].wsProxyUrl);
+        var watcherProxy = new _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__["WatcherProxy"](_environments_environment__WEBPACK_IMPORTED_MODULE_2__["environment"].wsProxyUrl, function () { return Object(_utils__WEBPACK_IMPORTED_MODULE_3__["uuidv4"])(); });
         var cachedWatcherProxy = new _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__["CachedWatcherProxy"](watcherProxy);
         this.validator = _interblockchain_validator_dist_browser__WEBPACK_IMPORTED_MODULE_1__["ValidatorFactory"].create(cachedWatcherProxy);
     }
@@ -1307,6 +1046,27 @@ var ValidationService = /** @class */ (function () {
     return ValidationService;
 }());
 
+
+
+/***/ }),
+
+/***/ "./src/app/utils.ts":
+/*!**************************!*\
+  !*** ./src/app/utils.ts ***!
+  \**************************/
+/*! exports provided: uuidv4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "uuidv4", function() { return uuidv4; });
+var uuidv4 = function () {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        // tslint:disable-next-line:no-bitwise
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
 
 
 /***/ }),
@@ -1328,8 +1088,10 @@ var environment = {
     production: false,
     // keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
     // wsProxyUrl: 'ws://178.128.230.11:8080/',
+    // ledgerUrl: 'http://138.197.156.204:8081/',
     wsProxyUrl: 'wss://carte7000-payment-demo.herokuapp.com',
     keyFactory: '/keyFactory/',
+    ledgerUrl: '/ledger/'
 };
 /*
  * In development mode, to ignore zone related error stack frames such as

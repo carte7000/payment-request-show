@@ -4,9 +4,10 @@ let express = require('express');
 let app = express();
 const http = require('http');
 const httpProxy = require('http-proxy');
+const bodyParser = require('body-parser');
 
 var proxy = httpProxy.createProxyServer({ target: 'ws://178.128.230.11:8080/', ws: true });
-
+app.use(bodyParser());
 // All of our paths have the Link header.
 app.use(function (req, res, next) {
   res.status(200).links({
@@ -20,6 +21,18 @@ app.use(express.static('public'));
 
 app.get('/keyFactory/:id/:ticker', (req, res) => {
   http.get(`http://142.93.60.68:5080/api/v1/getaddress/${req.params.id}/${req.params.ticker}`, (response) => {
+    response.pipe(res);
+  })
+})
+
+app.post('/ledger/tx', (req, res) => {
+  http.post('http://138.197.156.204:8081/tx', req.body, (response) => {
+    response.pipe(res);
+  })
+})
+
+app.post('/ledger/create', (req, res) => {
+  http.post('http://138.197.156.204:8081/create', req.body, (response) => {
     response.pipe(res);
   })
 })
