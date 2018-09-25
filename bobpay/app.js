@@ -28,7 +28,7 @@ app.get('/keyFactory/:id/:ticker', (req, res) => {
 app.post('/ledger/tx', (req, res) => {
   var post_data = JSON.stringify(req.body);
   var post_options = {
-    host: 'http://138.197.156.204',
+    host: '138.197.156.204',
     port: '8081',
     path: '/tx',
     method: 'POST',
@@ -50,7 +50,7 @@ app.post('/ledger/tx', (req, res) => {
 app.post('/ledger/create', (req, res) => {
   var post_data = JSON.stringify(req.body);
   var post_options = {
-    host: 'http://138.197.156.204',
+    host: '138.197.156.204',
     port: '8081',
     path: '/create',
     method: 'POST',
