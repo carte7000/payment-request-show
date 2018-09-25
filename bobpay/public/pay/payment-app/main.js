@@ -913,7 +913,7 @@ var PaymentSwService = /** @class */ (function () {
                     currency: "t" + total.currency,
                     folio: tx.toAddress,
                     note: ''
-                }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
+                }, '85732589752hjfslkjhf').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
                     return _this.ledger.createTx({
                         accountID: uuid,
                         amount: tx.amount,
@@ -921,7 +921,7 @@ var PaymentSwService = /** @class */ (function () {
                         provider: '',
                         from: '',
                         initialValue: '0'
-                    }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_) { return tx; }));
+                    }, '85732589752hjfslkjhf').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_) { return tx; }));
                 }));
             }));
         });
