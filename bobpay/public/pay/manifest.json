@@ -3,9 +3,9 @@
   "short_name": "Interblockchain",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "interblockchain.png",
       "sizes": "48x48",
-      "type": "image/ico"
+      "type": "image/png"
     }
   ],
   "serviceworker": {
