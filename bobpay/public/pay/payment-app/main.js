@@ -960,7 +960,7 @@ var PaymentSelectionComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class='container' *ngIf='currentTransaction | async as transaction'>\n  Amount: {{transaction.amount}}\n  <it-qr-code [value]='transaction.qrCode'></it-qr-code>\n  {{transaction.toAddress}}\n  <button>Copy</button>\n</div>\n<div>\n\n</div>"
+module.exports = "<div class='container' *ngIf='currentTransaction | async as transaction'>\n  Amount: {{transaction.amount}} {{transaction.network}}\n  <it-qr-code [value]='transaction.qrCode'></it-qr-code>\n  {{transaction.toAddress}}\n  <button>Copy</button>\n</div>\n<div>\n\n</div>"
 
 /***/ }),
 
@@ -1114,6 +1114,62 @@ var SummaryComponent = /** @class */ (function () {
 
 /***/ }),
 
+/***/ "./src/app/services/currency-converter/currency-converter.service.ts":
+/*!***************************************************************************!*\
+  !*** ./src/app/services/currency-converter/currency-converter.service.ts ***!
+  \***************************************************************************/
+/*! exports provided: CurrencyConverterService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CurrencyConverterService", function() { return CurrencyConverterService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+var CurrencyConverterService = /** @class */ (function () {
+    function CurrencyConverterService(http) {
+        this.http = http;
+        this.apiUrl = 'https://api.coinmarketcap.com';
+    }
+    CurrencyConverterService.prototype.convert = function (_a, toCurrency) {
+        var currency = _a.currency, value = _a.value;
+        var toCurrencyID = 1;
+        return this.http.get(this.apiUrl + "/v2/ticker/" + toCurrencyID + "/?convert=" + currency)
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (_a) {
+            var quotes = _a.data.quotes;
+            var changeRate = Number(quotes[currency].price);
+            return {
+                currency: toCurrency,
+                value: (Number(value) / changeRate).toFixed(10),
+            };
+        }));
+    };
+    CurrencyConverterService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        }),
+        __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
+    ], CurrencyConverterService);
+    return CurrencyConverterService;
+}());
+
+
+
+/***/ }),
+
 /***/ "./src/app/services/key-factory/key-factory.service.ts":
 /*!*************************************************************!*\
   !*** ./src/app/services/key-factory/key-factory.service.ts ***!
@@ -1237,6 +1293,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../validation/validation.service */ "./src/app/services/validation/validation.service.ts");
 /* harmony import */ var _ledger_ledger_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../ledger/ledger.service */ "./src/app/services/ledger/ledger.service.ts");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils */ "./src/app/utils.ts");
+/* harmony import */ var _currency_converter_currency_converter_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../currency-converter/currency-converter.service */ "./src/app/services/currency-converter/currency-converter.service.ts");
+/* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../environments/environment */ "./src/environments/environment.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1253,23 +1311,36 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
+
+var netPrefix = function (network) { return "t" + network; };
+var mockData = {
+    total: { value: 55, currency: 'USD' }, methodData: [{
+            supportedMethods: 'https://carte7000-payment-demo.herokuapp.com/pay', data: {
+                apiKey: '85732589752hjfslkjhf',
+                supportedTokens: ['tBTC']
+            }
+        }]
+};
 var PaymentSwService = /** @class */ (function () {
-    function PaymentSwService(keyFactory, validation, ledger) {
+    function PaymentSwService(keyFactory, validation, ledger, currencyConverter) {
         var _this = this;
         this.keyFactory = keyFactory;
         this.validation = validation;
         this.ledger = ledger;
-        this.swMessageSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["BehaviorSubject"]({ total: { value: 0.0003, currency: 'BTC' }, methodData: {} });
+        this.currencyConverter = currencyConverter;
+        this.swMessageSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["ReplaySubject"](); // new BehaviorSubject<PaymentRequestData>(mockData);
         this.writeTransactionInLedger = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (tx) {
             return _this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
-                var total = _a.total, apiKey = _a.methodData.apiKey;
+                var total = _a.total, methodData = _a.methodData;
+                var apiKey = methodData.find(function (x) { return x.supportedMethods === _environments_environment__WEBPACK_IMPORTED_MODULE_8__["environment"].methodName; }).data.apiKey;
                 var uuid = Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])();
                 return _this.ledger.createAccount({
                     accountID: uuid,
                     currency: "t" + total.currency,
                     folio: tx.toAddress,
                     note: 'test'
-                }, '85732589752hjfslkjhf').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(console.log), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
+                }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(console.log), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
                     return _this.ledger.createTx({
                         accountID: uuid,
                         amount: tx.amount,
@@ -1277,7 +1348,7 @@ var PaymentSwService = /** @class */ (function () {
                         provider: 'test',
                         from: 'test',
                         initialValue: '0'
-                    }, '85732589752hjfslkjhf').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_) { return tx; }));
+                    }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_) { return tx; }));
                 }));
             }));
         });
@@ -1294,14 +1365,14 @@ var PaymentSwService = /** @class */ (function () {
             }
         });
         this.getPaymentKeyAndCreateTransaction = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
-            var currency = _a.currency, value = _a.value;
+            var _b = _a.converted, currency = _b.currency, value = _b.value;
             return _this.keyFactory.getKey(Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])(), currency).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
                 var key = _a.key;
                 return ({
                     toAddress: key,
                     amount: value,
                     nbConf: 0,
-                    network: currency.toUpperCase(),
+                    network: netPrefix(currency.toUpperCase()),
                     id: Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])()
                 });
             })));
@@ -1309,9 +1380,12 @@ var PaymentSwService = /** @class */ (function () {
         this.currentTransaction = this.swMessageSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (_a) {
             var total = _a.total;
             return ({
-                currency: "t" + total.currency,
+                currency: total.currency,
                 value: total.value,
             });
+        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (original) {
+            return _this.currencyConverter.convert(original, 'BTC')
+                .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (converted) { return ({ converted: converted, original: original }); }));
         }), this.getPaymentKeyAndCreateTransaction, Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["shareReplay"])());
         this.currentValidation = this.currentTransaction.pipe(this.writeTransactionInLedger, this.watchingConfirmationsAndMapToValidation, this.sendResultToClientIfCompleted);
     }
@@ -1348,7 +1422,8 @@ var PaymentSwService = /** @class */ (function () {
         }),
         __metadata("design:paramtypes", [_key_factory_key_factory_service__WEBPACK_IMPORTED_MODULE_1__["KeyFactoryService"],
             _validation_validation_service__WEBPACK_IMPORTED_MODULE_4__["ValidationService"],
-            _ledger_ledger_service__WEBPACK_IMPORTED_MODULE_5__["LedgerService"]])
+            _ledger_ledger_service__WEBPACK_IMPORTED_MODULE_5__["LedgerService"],
+            _currency_converter_currency_converter_service__WEBPACK_IMPORTED_MODULE_7__["CurrencyConverterService"]])
     ], PaymentSwService);
     return PaymentSwService;
 }());
@@ -1444,6 +1519,7 @@ var environment = {
     // keyFactory: 'http://142.93.60.68:5080/api/v1/getaddress/',
     // wsProxyUrl: 'ws://178.128.230.11:8080/',
     // ledgerUrl: 'http://138.197.156.204:8081/',
+    methodName: 'https://carte7000-payment-demo.herokuapp.com/pay',
     wsProxyUrl: 'wss://carte7000-payment-demo.herokuapp.com',
     keyFactory: '/keyFactory/',
     ledgerUrl: '/ledger/'
