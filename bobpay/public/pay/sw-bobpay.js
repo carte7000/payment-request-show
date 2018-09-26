@@ -7,6 +7,7 @@ self.addEventListener('canmakepayment', function (e) {
 
 self.addEventListener('paymentrequest', function (e) {
   payment_request_event = e;
+  console.log(e);
 
   payment_request_resolver = new PromiseResolver();
   e.respondWith(payment_request_resolver.promise);
