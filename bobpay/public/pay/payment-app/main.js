@@ -1366,7 +1366,7 @@ var PaymentSwService = /** @class */ (function () {
         });
         this.getPaymentKeyAndCreateTransaction = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function (_a) {
             var _b = _a.converted, currency = _b.currency, value = _b.value;
-            return _this.keyFactory.getKey(Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])(), currency).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
+            return _this.keyFactory.getKey(Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])(), netPrefix(currency)).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((function (_a) {
                 var key = _a.key;
                 return ({
                     toAddress: key,
