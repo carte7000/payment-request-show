@@ -138,6 +138,7 @@ const operators_1 = __webpack_require__(/*! rxjs/operators */ "../validator-lib/
 const transfer_request_1 = __webpack_require__(/*! ../transfer-request */ "../validator-lib/dist/transfer-request.js");
 const bignumber_js_1 = __webpack_require__(/*! bignumber.js */ "../validator-lib/node_modules/bignumber.js/bignumber.js");
 const address_validation_1 = __webpack_require__(/*! ../address-validation */ "../validator-lib/dist/address-validation.js");
+// import { logger } from '../logger/logger';
 class Validator {
     constructor(_watcherProxy) {
         this._watcherProxy = _watcherProxy;
@@ -205,6 +206,7 @@ class Validator {
         return `${address.toUpperCase()}:${response.network.toUpperCase()}:${response.addresses[0].amount}`;
     }
     validateSingleTransaction(request) {
+        // logger.info('[Validator]: Start validation on single transaction:', request.id);
         return this._watcherProxy.watch(request.id, request.address, request.network, request.nbConf).pipe(operators_1.tap(() => console.log('Data received')), operators_1.tap(console.log), operators_1.map(this.uniformize), this.isResponseEventMatchingSingleRequest(request), operators_1.tap(() => console.log('Response matching request'))).pipe(operators_1.map((validation) => {
             return Object.assign({ id: request.id }, validation, { requiredNbConf: request.nbConf, currentNbConf: validation.nbConf, amount: validation.addresses[0].amount });
         }), operators_1.map((response) => new address_validation_1.AddressValidation(response)), this.unsubscribeOnCompleted(request));
@@ -1319,6 +1321,7 @@ var PaymentSwService = /** @class */ (function () {
             navigator.serviceWorker.addEventListener('message', function (e) {
                 _this.paymentRequestClient = e.source;
                 _this.swMessageSubject.next(e.data);
+                console.log(e);
             });
         }
         if (navigator.serviceWorker.controller) {
@@ -1444,6 +1447,7 @@ var environment = {
     wsProxyUrl: 'wss://carte7000-payment-demo.herokuapp.com',
     keyFactory: '/keyFactory/',
     ledgerUrl: '/ledger/'
+    // ledgerUrl: 'http://localhost:8081/'
 };
 /*
  * In development mode, to ignore zone related error stack frames such as
