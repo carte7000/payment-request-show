@@ -1153,7 +1153,7 @@ var CurrencyConverterService = /** @class */ (function () {
             var changeRate = Number(quotes[currency].price);
             return {
                 currency: toCurrency,
-                value: (Number(value) / changeRate).toFixed(10),
+                value: (Number(value) / changeRate).toFixed(6),
             };
         }));
     };
@@ -1359,7 +1359,7 @@ var PaymentSwService = /** @class */ (function () {
         this.sendResultToClientIfCompleted = Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (v) {
             if (v.isCompleted) {
                 _this.details = {
-                    amount: Math.pow(10, 8) * v.info.amount,
+                    amount: v.info.amount,
                     address: v.info.addresses[0].address
                 };
             }
