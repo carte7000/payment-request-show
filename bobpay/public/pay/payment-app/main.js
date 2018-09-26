@@ -1337,14 +1337,14 @@ var PaymentSwService = /** @class */ (function () {
                 var uuid = Object(_utils__WEBPACK_IMPORTED_MODULE_6__["uuidv4"])();
                 return _this.ledger.createAccount({
                     accountID: uuid,
-                    currency: "t" + total.currency,
+                    currency: tx.network,
                     folio: tx.toAddress,
                     note: 'test'
                 }, apiKey).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(console.log), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["switchMap"])(function () {
                     return _this.ledger.createTx({
                         accountID: uuid,
                         amount: tx.amount,
-                        currency: "t" + total.currency,
+                        currency: tx.network,
                         provider: 'test',
                         from: 'test',
                         initialValue: '0'
