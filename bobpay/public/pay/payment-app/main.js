@@ -792,7 +792,7 @@ var AppModule = /** @class */ (function () {
                 _angular_router__WEBPACK_IMPORTED_MODULE_2__["RouterModule"].forRoot([
                     { path: '', pathMatch: 'full', component: _pages_payment_selection_payment_selection_component__WEBPACK_IMPORTED_MODULE_7__["PaymentSelectionComponent"] },
                     { path: 'payment', pathMatch: 'full', component: _pages_payment_payment_component__WEBPACK_IMPORTED_MODULE_5__["PaymentComponent"] },
-                    { path: 'confirmations', pathMatch: 'full', component: _pages_confirmations_confirmations_component__WEBPACK_IMPORTED_MODULE_8__["ConfirmationsComponent"] },
+                    { path: 'confirmations', component: _pages_confirmations_confirmations_component__WEBPACK_IMPORTED_MODULE_8__["ConfirmationsComponent"] },
                 ])
             ],
             providers: [_services_key_factory_key_factory_service__WEBPACK_IMPORTED_MODULE_10__["KeyFactoryService"], _services_payment_sw_payment_sw_service__WEBPACK_IMPORTED_MODULE_11__["PaymentSwService"]],
@@ -897,7 +897,7 @@ var ConfirmationsComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class='center-content'>\n  <h4>Please the cryptocurrency you wish to pay with</h4>\n  <div class='logo-container row'>\n    <div class='col-xs-{{colSize}} center-content' *ngFor='let currency of supportedCurrencies'>\n      <div class='logo' (click)='select(currency)'>\n        <img class='logo-image' [class.grow]='selectedCurrency === currency' [src]='\"/assets/\" + currency.logo' />\n      </div>\n    </div>\n  </div>\n  <br>\n  <button *ngIf='selectedCurrency' (click)='submit()' class='btn btn-primary'>Pay with {{selectedCurrency.name}}</button>\n</div>"
+module.exports = "<div class='center-content'>\n  <h4>Please the cryptocurrency you wish to pay with</h4>\n  <div class='logo-container row'>\n    <div class='col-xs-{{colSize}} center-content' *ngFor='let currency of supportedCurrencies'>\n      <div class='logo' (click)='select(currency)'>\n        <img class='logo-image' [class.grow]='selectedCurrency === currency' [src]='baseHref + \"assets/\" + currency.logo' />\n      </div>\n    </div>\n  </div>\n  <br>\n  <button *ngIf='selectedCurrency' (click)='submit()' class='btn btn-primary'>Pay with {{selectedCurrency.name}}</button>\n</div>"
 
 /***/ }),
 
@@ -926,6 +926,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../environments/environment */ "./src/environments/environment.ts");
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
 /* harmony import */ var _services_currency_selection_currency_selection_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/currency-selection/currency-selection.service */ "./src/app/services/currency-selection/currency-selection.service.ts");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/fesm5/common.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -939,13 +940,22 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
 var PaymentSelectionComponent = /** @class */ (function () {
-    function PaymentSelectionComponent(router, selectionService) {
+    function PaymentSelectionComponent(router, selectionService, platformLocation) {
         this.router = router;
         this.selectionService = selectionService;
+        this.platformLocation = platformLocation;
         this.colSize = 3;
         this.selectedCurrency = null;
     }
+    Object.defineProperty(PaymentSelectionComponent.prototype, "baseHref", {
+        get: function () {
+            return this.platformLocation.getBaseHrefFromDOM();
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(PaymentSelectionComponent.prototype, "supportedCurrencies", {
         get: function () {
             return _environments_environment__WEBPACK_IMPORTED_MODULE_1__["environment"].supportedCurrencies;
@@ -971,7 +981,8 @@ var PaymentSelectionComponent = /** @class */ (function () {
             styles: [__webpack_require__(/*! ./payment-selection.component.scss */ "./src/app/pages/payment-selection/payment-selection.component.scss")]
         }),
         __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
-            _services_currency_selection_currency_selection_service__WEBPACK_IMPORTED_MODULE_3__["CurrencySelectionService"]])
+            _services_currency_selection_currency_selection_service__WEBPACK_IMPORTED_MODULE_3__["CurrencySelectionService"],
+            _angular_common__WEBPACK_IMPORTED_MODULE_4__["PlatformLocation"]])
     ], PaymentSelectionComponent);
     return PaymentSelectionComponent;
 }());
@@ -1060,7 +1071,6 @@ var PaymentComponent = /** @class */ (function () {
         var _this = this;
         this.sw.currentValidation.subscribe(function () {
             _this.sw.confirmPayment();
-            // this.router.navigate(['/confirmations']);
         });
     };
     PaymentComponent.prototype.copy = function () {
