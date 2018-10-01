@@ -25,6 +25,12 @@ app.get('/keyFactory/:id/:ticker', (req, res) => {
   })
 })
 
+app.get('/accounts', (req, res) => {
+  http.get('http://178.128.230.11:8096/api/v1/accounts/?id=12345678', (response) => {
+    response.pipe(res);
+  })
+});
+
 app.post('/ledger/tx', (req, res) => {
   var post_data = JSON.stringify(req.body);
   var post_options = {
