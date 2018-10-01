@@ -238,7 +238,7 @@ class Validator {
     validateSingleTransaction(request) {
         // logger.info('[Validator]: Start validation on single transaction:', request.id);
         return this._watcherProxy.watch(request.id, request.address, request.network, request.nbConf).pipe(operators_1.tap(() => console.log('Data received')), operators_1.tap(console.log), operators_1.map(this.uniformize), this.isResponseEventMatchingSingleRequest(request), operators_1.tap(() => console.log('Response matching request'))).pipe(operators_1.map((validation) => {
-            return Object.assign({ id: request.id }, validation, { requiredNbConf: request.nbConf, currentNbConf: validation.nbConf, amount: validation.addresses[0].amount });
+            return Object.assign({ id: request.id }, validation, { requiredNbConf: request.nbConf, currentNbConf: validation.nbConf, amount: Number(this.convertToAmount(validation.addresses[0].amount, validation.network)) });
         }), operators_1.map((response) => new address_validation_1.AddressValidation(response)), this.unsubscribeOnCompleted(request));
     }
     ;
