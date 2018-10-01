@@ -1326,7 +1326,7 @@ var ConfirmationsComponent = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class='center-content'>\n  <h4>Please the cryptocurrency you wish to pay with</h4>\n  <div class='logo-container row'>\n    <div class='col-md-{{colSize | async }} center-content' *ngFor='let currency of supportedCurrencies | async'>\n      <div class='logo' (click)='select(currency)'>\n        <img class='logo-image' [class.grow]='selectedCurrency === currency' [src]='baseHref + \"assets/\" + currency.logo' />\n      </div>\n      <br>\n      {{currency.name}}\n    </div>\n  </div>\n  <br>\n  <button *ngIf='selectedCurrency' (click)='submit()' class='btn btn-primary'>Pay with {{selectedCurrency.name}}</button>\n</div>"
+module.exports = "<div class='center-content logo-container'>\n  <h4>Please the cryptocurrency you wish to pay with</h4>\n  <div class='logo-container row'>\n    <div class='logo-div center-content' *ngFor='let currency of supportedCurrencies | async'>\n      <div class='logo' (click)='select(currency)'>\n        <img class='logo-image' [class.grow]='selectedCurrency === currency' [src]='baseHref + \"assets/\" + currency.logo' />\n      </div>\n      <br>\n      {{currency.name}}\n    </div>\n  </div>\n  <br>\n  <button *ngIf='selectedCurrency' (click)='submit()' class='btn btn-primary'>Pay with {{selectedCurrency.name}}</button>\n</div>"
 
 /***/ }),
 
@@ -1337,7 +1337,7 @@ module.exports = "<div class='center-content'>\n  <h4>Please the cryptocurrency 
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".logo-container {\n  width: 100%;\n  max-width: 640px;\n  justify-content: space-between; }\n  .logo-container .logo {\n    height: 70px;\n    width: 70px;\n    margin-top: 20px;\n    cursor: pointer; }\n  .logo-container .logo .logo-image {\n      border-radius: 50%;\n      box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);\n      background-color: white;\n      width: 100%;\n      margin-bottom: 5px;\n      transition: -webkit-transform .2s;\n      transition: transform .2s;\n      transition: transform .2s, -webkit-transform .2s; }\n  .logo-container .logo .logo-image.grow, .logo-container .logo .logo-image:hover {\n        -webkit-transform: scale(1.3);\n                transform: scale(1.3); }\n"
+module.exports = ".logo-container {\n  width: 100%;\n  max-width: 640px;\n  justify-content: space-between;\n  margin: 0 auto; }\n  .logo-container .logo-div {\n    min-width: 100px;\n    margin: 0 auto; }\n  .logo-container .logo-div .logo {\n      height: 70px;\n      width: 70px;\n      margin-top: 20px;\n      cursor: pointer; }\n  .logo-container .logo-div .logo .logo-image {\n        border-radius: 50%;\n        box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);\n        background-color: white;\n        width: 100%;\n        margin-bottom: 5px;\n        transition: -webkit-transform .2s;\n        transition: transform .2s;\n        transition: transform .2s, -webkit-transform .2s; }\n  .logo-container .logo-div .logo .logo-image.grow, .logo-container .logo-div .logo .logo-image:hover {\n          -webkit-transform: scale(1.3);\n                  transform: scale(1.3); }\n"
 
 /***/ }),
 
